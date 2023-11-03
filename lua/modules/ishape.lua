@@ -1,22 +1,23 @@
 --- Spawn interactable shapes with a callback and detection areas for an in-world message and button display.
 
----@code iShape = require("iShape")
+---@code ishape = require("ishape")
+---
 ---exampleConfig = {
---- position = Number3(10, 10, 10),
---- rotation = Number3(0, math.pi, 0),
---- scale = 0.5,
---- callback = function() print("Do something!") end,
---- bubbleText = "This does something when you click or collide",
---- buttonText = "Click me",
---- buttonCallback = function() print("Do something else ?") end,
---- callbackTriggerDistance = 1 * MAP_SCALE
---- bubbleTriggerDistance = 10 * MAP_SCALE
---- buttonTriggerDistance = 10 * MAP_SCALE
+---     position = Number3(10, 10, 10),
+---     rotation = Number3(0, math.pi, 0),
+---     scale = 0.5,
+---     callback = function() print("Do something!") end,
+---     bubbleText = "This does something when you click or collide",
+---     buttonText = "Click me",
+---     buttonCallback = function() print("Do something else ?") end,
+---     callbackTriggerDistance = 1 * MAP_SCALE
+---     bubbleTriggerDistance = 10 * MAP_SCALE
+---     buttonTriggerDistance = 10 * MAP_SCALE
 ---}
----iShape:create(shape, exampleConfig)
+---
+---ishape:create(shape, exampleConfig)-
 
-
----@type iShape
+---@type ishape
 
 local iShape = {}
 local index = {}
@@ -144,17 +145,17 @@ local _addButton = function(pShape, pConfig)
 	end
 end
 
-
-
----@function creates an iShape
----@param config table
----@code iShape = require("iShape")
----myConfig = {
---- position = Number3(10, 0, 10)
---- scale = 3
---- callback = function() print("I've been clicked") end
+---@function create creates an iShape
+---@param shape Shape
+---@param config? table
+---@return ishapeInstance
+---@code myConfig = {
+---     position = Number3(10, 0, 10)
+---     scale = 3
+---     callback = function() print("I've been clicked") end
 ---}
----myInteractableShape = iShape.create(Items.user.shape, myConfig)
+---
+---myInteractableShape = ishape.create(Items.user.someShape, myConfig)
 index.create = function(shape, config)
     -- Checking config
     local _config = {}
@@ -172,41 +173,45 @@ index.create = function(shape, config)
     -- Creating shape and adding relevant configs
     local _shape = _createBaseShape(shape, _config)
 
-    -- Direct modification functions
-    ---@function Sets the OnClick callback for an existing iShape
-    ---@param function
+    ---@function setCallback Sets the OnClick callback for an existing iShape
+    ---@param self ishapeInstance
+    ---@param callback function
     ---@code myInteractableShape:setCallback(function() print("This is a new callback") end)
     _shape.setCallback = function(self, callback) 
         if self ~= _shape then error("iShape:setCallback should be called with `:`", 2) end
         if type(callback) ~= "function" then error("Parameter is not a function", 2) end
         self.callback = callback
     end
-    ---@function Sets the Button callback for an existing iShape with a button
-    ---@param function
+    ---@function setButtonCallback Sets the Button callback for an existing iShape with a button
+    ---@param self ishapeInstance
+    ---@param callback function
     ---@code myInteractableShape:setButtonCallback(function() print("This is a new button callback") end)
     _shape.setButtonCallback = function(self, callback) 
         if self ~= _shape then error("iShape:setButtonCallback should be called with `:`", 2) end
         if type(callback) ~= "function" then error("Parameter is not a function", 2) end
         self.button.onRelease = callback
     end
-    ---@function Sets the bubble text message for an existing iShape with a text bubble
-    ---@param text
+    ---@function setBubbleText the bubble text message for an existing iShape with a text bubble
+    ---@param self ishapeInstance
+    ---@param text string
     ---@code myInteractableShape:setBubbleText("New text bubble content")
     _shape.setBubbleText = function(self, text) 
         if self ~= _shape then error("iShape:setMessage should be called with `:`", 2) end
         if type(text) ~= "string" then error("Parameter is not a string", 2) end
         self.message.Text = text 
     end
-    ---@function Sets the button text for an existing iShape with a button
-    ---@param text
+    ---@function setButtonText Sets the button text for an existing iShape with a button
+    ---@param self ishapeInstance
+    ---@param text string
     ---@code myInteractableShape:setButtonText("New text bubble content")
     _shape.setButtonText = function(self, text)
         if self ~= _shape then error("iShape:setButtonText should be called with `:`", 2) end
         if type(text) ~= "string" then error("Parameter is not a string", 2) end 
         self.button.Text = text 
     end
-    ---@function Sets the trigger distance in blocks (factor in the scale) for the callback On Collision with the Player
-    ---@param integer
+    ---@function setCallbackTriggerDistance Sets the trigger distance in blocks (factor in the scale) for the callback On Collision with the Player
+    ---@param self ishapeInstance
+    ---@param distance number
     ---@code myInteractableShape:setCallbackTriggerDistance(10)
     _shape.setCallbackTriggerDistance = function(self, distance)
         if self ~= _shape then error("iShape:setCallbackTriggerDistance should be called with `:`", 2) end
@@ -214,8 +219,9 @@ index.create = function(shape, config)
         if self.triggerCallbackArea then self.triggerCallbackArea.CollisionBox = _createOffsetCollisionBox(self, distance)
         else _addCallbackTriggerArea(self, {callbackTriggerDistance = distance}) end
     end
-    ---@function Sets the trigger distance in blocks (factor in the scale) for the Text bubble to appear
-    ---@param integer
+    ---@function setBubbleTriggerDistance Sets the trigger distance in blocks (factor in the scale) for the Text bubble to appear
+    ---@param self ishapeInstance
+    ---@param distance number
     ---@code myInteractableShape:setBubbleTriggerDistance(10)
     _shape.setBubbleTriggerDistance = function(self, distance)
         if self ~= _shape then error("iShape:setBubbleTriggerDistance should be called with `:`", 2) end
@@ -223,8 +229,9 @@ index.create = function(shape, config)
         if self.triggerBubbleArea then self.triggerBubbleArea.CollisionBox = _createOffsetCollisionBox(self, distance)
         else _addTextTriggerArea(self, {bubbleTriggerDistance = distance}) end
     end
-    ---@function Sets the trigger distance in blocks (factor in the scale) for the button to appear
-    ---@param integer
+    ---@function setButtonTriggerDistance Sets the trigger distance in blocks (factor in the scale) for the button to appear
+    ---@param self ishapeInstance
+    ---@param distance number
     ---@code myInteractableShape:setButtonTriggerDistance(10)
     _shape.setButtonTriggerDistance = function(self, distance) 
         if self ~= _shape then error("iShape:setButtonTriggerDistance should be called with `:`", 2) end
